@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'dart:ui';
+
+import 'package:weather_app/Weather/Provider/Weather_provider.dart';
 
 class Home_screen extends StatefulWidget {
   const Home_screen({Key? key}) : super(key: key);
@@ -10,13 +13,28 @@ class Home_screen extends StatefulWidget {
 }
 
 class _Home_screenState extends State<Home_screen> {
+  WetherProvider? providerF;
+  WetherProvider? providerT;
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<WetherProvider>(context, listen: false).apiDataParsing();
+  }
+
   @override
   Widget build(BuildContext context) {
+    providerF = Provider.of<WetherProvider>(context, listen: false);
+    providerT = Provider.of<WetherProvider>(context, listen: true);
+
     return DefaultTabController(
       length: 2,
       initialIndex: 0,
       child: SafeArea(
         child: Scaffold(
+          // body: providerT!.w1 == null
+          //     ? Center(child: CircularProgressIndicator())
+          //     :
           body: Stack(
             children: [
               //image
@@ -35,24 +53,48 @@ class _Home_screenState extends State<Home_screen> {
                 padding: const EdgeInsets.only(top: 100),
                 child: Align(
                     alignment: Alignment.topCenter,
-                    child: Text(
-                      "Surat",
-                      style: TextStyle(fontSize: 25, color: Colors.white),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        items: providerT!.cityList
+                            .map((e) => DropdownMenuItem(
+                                  child: Text(
+                                    "$e",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  value: e,
+                                ))
+                            .toList(),
+                        hint: Text(
+                          "${providerT!.city}",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        dropdownColor: Colors.white10,
+                        elevation: 0,
+                        iconDisabledColor: Colors.white,
+                        iconEnabledColor: Colors.white,
+                        onChanged: (value) {
+                          providerF!.changeCity(value as String);
+                        },
+                      ),
                     )),
               ),
               //temperature
               Padding(
-                padding: const EdgeInsets.only(top: 120),
+                padding: const EdgeInsets.only(top: 130),
                 child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      "26'",
-                      style: TextStyle(fontSize: 100, color: Colors.white),
-                    )),
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    "${providerF!.w1.main!.temp!-273}\u00b0",
+                    style: TextStyle(fontSize: 100, color: Colors.white),
+                  ),
+                ),
               ),
               //mosam
               Padding(
-                padding: const EdgeInsets.only(top: 220),
+                padding: const EdgeInsets.only(top: 230),
                 child: Align(
                     alignment: Alignment.topCenter,
                     child: Text(
@@ -66,7 +108,7 @@ class _Home_screenState extends State<Home_screen> {
                 child: Align(
                     alignment: Alignment.topCenter,
                     child: Text(
-                      "H : 27' L : 18'",
+                      "H : 27\u00B0  L : 18\u00b0",
                       style: TextStyle(fontSize: 20, color: Colors.white),
                     )),
               ),
@@ -126,11 +168,16 @@ class _Home_screenState extends State<Home_screen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          temperature("12 PM","assets/image/sun.png","27'"),
-                          temperature("NOW","assets/image/sun.png","27'"),
-                          temperature("12 PM","assets/image/sun.png","27'"),
-                          temperature("12 PM","assets/image/sun.png","27'"),
-                          temperature("12 PM","assets/image/sun.png","27'"),
+                          temperature(
+                              "12 PM", "assets/image/sun.png", "27\u00b0"),
+                          temperature(
+                              "NOW", "assets/image/sun.png", "27\u00b0"),
+                          temperature(
+                              "12 PM", "assets/image/sun.png", "27\u00b0"),
+                          temperature(
+                              "12 PM", "assets/image/sun.png", "27\u00b0"),
+                          temperature(
+                              "12 PM", "assets/image/sun.png", "27\u00b0"),
                         ],
                       ),
                       //option
@@ -172,7 +219,7 @@ class _Home_screenState extends State<Home_screen> {
     );
   }
 
-  Widget temperature(String time,String img,String temp) {
+  Widget temperature(String time, String img, String temp) {
     return Container(
       height: 20.h,
       width: 16.w,
@@ -189,11 +236,17 @@ class _Home_screenState extends State<Home_screen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           //time
-          Text("$time",style: TextStyle(fontSize: 18,color: Colors.white),),
+          Text(
+            "$time",
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
           //image
           Image.asset("$img"),
           //temperature
-          Text("$temp",style: TextStyle(fontSize: 18,color: Colors.white),),
+          Text(
+            "$temp",
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
         ],
       ),
     );
